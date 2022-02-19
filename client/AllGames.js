@@ -40,7 +40,6 @@ const AllGames = () => {
       {games.map((game, idx) => (
         <Grid item key={idx} xs={12} md={6} lg={4} id="card">
           <Card>
-            <CardActionArea>
               <CardMedia
                 component="img"
                 height="140"
@@ -55,7 +54,6 @@ const AllGames = () => {
                   {game.description}
                 </Typography>
               </CardContent>
-            </CardActionArea>
             <CardActions>
               <Button size="small">Share</Button>
               <Button size="small" onClick={() => navigate(`/games/${game.id}`)}>Learn More</Button>

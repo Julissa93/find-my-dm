@@ -19,17 +19,18 @@ const GameDetails = () => {
   const { id } = useParams();
   let navigate = useNavigate();
   useEffect(() => {
+    console.log("useEffect being called???")
     async function fetchGameDetails() {
-      try {
-        const { data } = await axios.get(`/api/games/${id}`);
-        setGameDetails(data);
-        console.log("data: ", data);
-      } catch (err) {
-        console.error(err);
-      }
+        try {
+          const { data } = await axios.get(`/api/games/${id}`);
+          if (editGame === false) setGameDetails(data);
+          console.log("data: ", data);
+        } catch (err) {
+          console.error(err);
+        }
     }
     fetchGameDetails();
-  }, []);
+  }, [editGame]);
 
   const deleteGame = async () => {
     try {
@@ -41,7 +42,7 @@ const GameDetails = () => {
   };
 
   if(editGame === true)
-    return(<CreateGame {...gameDetails} editGame />)
+    return(<CreateGame {...gameDetails} editGame setEditGame={setEditGame} setGameDetails={setGameDetails} />)
 
   return (
     <Grid container direction="column" id="game-details">
