@@ -1,6 +1,5 @@
-import {Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToMany, JoinTable} from "typeorm";
+import {Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable} from "typeorm";
 import Game from "./Game";
-import GameTags from "./GameTags";
 
 @Entity()
 export default class Tag extends BaseEntity {
@@ -10,6 +9,6 @@ export default class Tag extends BaseEntity {
     @Column({unique: true})
     tag_name: String;
 
-    @OneToMany(() => GameTags, gameTags => gameTags.tag, {cascade: true})
-    game_tags: GameTags
+    @ManyToMany((type) => Game, {cascade: true})
+    game_tags: Game[];
 }

@@ -1,8 +1,7 @@
-import { getConnection } from "typeorm";
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
-
+import {BaseEntity, Entity, PrimaryGeneratedColumn, ManyToMany, Column} from "typeorm";
+import Game from "./Game";
 @Entity()
-export default class User {
+export default class User extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -11,4 +10,7 @@ export default class User {
     
     @Column()
     password: string;
+
+    @ManyToMany((type) => Game, (game) => game.players, {cascade: true, eager: true})
+    games: Game[];
 }

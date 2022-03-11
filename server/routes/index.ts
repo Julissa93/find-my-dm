@@ -1,8 +1,8 @@
-import { RouterRounded } from "@mui/icons-material";
 import express from "express";
 const router = express.Router();
 
 router.use("/games", require("./games"));
-//router.use("/users", require("."))
+router.use("/auth", require("./auth"));
+router.use("/users", require("./users"));
 
 module.exports = router;

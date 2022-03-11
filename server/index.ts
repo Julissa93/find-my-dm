@@ -20,16 +20,21 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 //app.use('/users', require('./entities/User.ts'))
 app.use("/api", require("./routes/index"));
 
-app.post("/login", (req, res, next) => {
-  try {
-  } catch (err) {
-    console.log("Error message: ", err.message);
+app.use((req, res, next) => {
+  if(path.extname(req.path).length > 0) {
+    res.status(404).end();
+  } else {
+    next();
   }
 });
 
 // sends index.html
 app.use("*", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "./public/index.html"));
+});
+
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).send(err.message || "Internal Server Error.");
 });
 
 app.listen(PORT, async () => {

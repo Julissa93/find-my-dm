@@ -1,132 +1,117 @@
 import express from "express";
 import Game from "../entities/Game";
 import Tag from "../entities/Tag";
-import GameTags from "../entities/GameTags";
+import User from "../entities/User";
 import { getConnection } from "typeorm";
+import { requireToken } from "./auth";
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const games = await Game.find();
+    const games = await Game.find({ relations: ["tags", "players"] });
     res.send(games);
   } catch (err) {
-    console.log("Something went wrong!", err);
+    next(err);
   }
 });
 
 router.get("/:id", async (req, res, next) => {
   try {
     const game = await Game.findOne(req.params.id, {
-      relations: ["game_tags"],
+      relations: ["tags"],
     });
-    const tagIds = [];
-    for (const key in game.game_tags) {
-      console.log("game tag = ", game.game_tags[key].tagId);
-      tagIds.push(game.game_tags[key].tagId);
-    }
-    const foundGameTags = await Tag.findByIds(tagIds);
-    const tags = [];
-    for (const key in foundGameTags) {
-      tags.push(foundGameTags[key].tag_name);
-    }
-    res.send({ ...game, tags });
+    res.send(game);
   } catch (err) {
     next(err);
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", async (req: any, res, next) => {
+  console.log("req.body = ", req.body);
   try {
-    console.log("POST REQ BODY = ", req.body);
-    const game = await Game.create({
-      imageUrl: req.body.imageUrl,
-      game_name: req.body.game_name,
-      game_type: req.body.game_type,
-      genre: req.body.genre,
-      description: req.body.description,
-    }).save();
-
-    req.body.tags.forEach(async (tagName) => {
-      //TODO: Look for possible better solution that's not O(n^2)
-      const existingTag = await Tag.findOne({ tag_name: tagName });
-      if (existingTag === undefined) {
-        let tag = await Tag.create({ tag_name: tagName }).save();
-        await GameTags.create({ tagId: tag.id, gameId: game.id }).save();
-      } else {
-        await GameTags.create({
-          tagId: existingTag.id,
-          gameId: game.id,
-        }).save();
-      }
-    });
-
-    res.send(game);
-  } catch (err) {
-    console.log("Something went wrong!", err);
-  }
-});
-
-router.put("/:id", async (req, res, next) => {
-  console.log("IN PUT ROUTE");
-  const { id, imageUrl, game_name, game_type, genre, description, tags } =
-    req.body.game;
-  const { tagsToDelete } = req.body;
-  try {
-    //console.log("req.body = ", req.body)
-    const gameToUpdate = await Game.findOne(req.params.id);
-    //console.log("Game to Update = ", gameToUpdate)
-    if (gameToUpdate.id) {
-      const updatedGame = await getConnection()
-        .createQueryBuilder()
-        .update(Game)
-        .set({ imageUrl, game_name, game_type, genre, description })
-        .where("id= :id", { id: req.params.id })
-        .execute();
-      tags.map(async (tag) => {
-        console.log("tag = ", tag);
-        let foundTag = await Tag.findOne({ where: { tag_name: tag } });
-        if (foundTag === undefined) {
-          foundTag = await Tag.create({ tag_name: tag }).save();
-        }
-        console.log("Found Tag = ", foundTag);
-        let foundGameTag = await GameTags.findOne({
-          tagId: foundTag.id,
-          gameId: Number(req.params.id),
-        })
-        console.log("found game tag relation = ", foundGameTag)
-        if(foundGameTag === undefined) {
-          await GameTags.create({
-            tagId: foundTag.id,
-            gameId: Number(req.params.id),
-          }).save();
-        }
+    if (req.user) {
+      const game = await Game.create({
+        imageUrl: req.body.game.imageUrl,
+        game_name: req.body.game.game_name,
+        game_type: req.body.game.game_type,
+        genre: req.body.game.genre,
+        description: req.body.game.description,
+      }).save();
+      const createdGame = await Game.findOne({
+        where: { id: game.id },
+        relations: ["tags", "players"],
       });
-      //deleting relations if a user deletes a tag for their game.
-      //need to find the tag by name to delete which is stored in req.body.tagsToDelete
-      //delete the relation in game_tags
-      if (tagsToDelete.length > 0) {
-        tagsToDelete.forEach(async (tag) => {
-          const retrievedTag = await Tag.findOne({ where: { tag_name: tag } });
-          const retrievedGameTag = await GameTags.findOne({
-            where: { gameId: id, tagId: retrievedTag.id },
-          });
-          await GameTags.delete({id: retrievedGameTag.id});
-        });
-      }
-      res.send(updatedGame);
+      const { userId } = req.body;
+      let player = await User.findOne({
+        where: { id: userId },
+        relations: ["games"],
+      });
+      createdGame.players = [...createdGame.players, player];
+      let tags = await Promise.all(
+        req.body.game.tags.map(async (tag) => {
+          let foundTag = await Tag.findOne({ where: { tag_name: tag } });
+          if (!foundTag) {
+            foundTag = await Tag.create({ tag_name: tag }).save();
+          }
+          return foundTag;
+        })
+      );
+      createdGame.tags = tags;
+      await createdGame.save();
+      console.log("player after save = ", player);
+      console.log("CREATED GAME = ", createdGame);
+      res.send(createdGame);
+    } else {
+      res.status(500).send("Unauthorized Request.");
     }
   } catch (err) {
-    console.log("Something Went Wrong!!!", err);
+    next(err);
   }
 });
 
+router.put("/:id", async (req: any, res, next) => {
+  const { imageUrl, game_name, game_type, genre, description, tags } = req.body;
+  const { id } = req.params;
+  try {
+    if (req.user) {
+      const game = await Game.findOne({ where: { id } });
+      //add tags
+      let newTags = await Promise.all(
+        tags.map(async (tag) => {
+          if (!tag.id) {
+            let foundTag = await Tag.findOne({ where: { tag_name: tag } });
+            if (!foundTag) {
+              tag = await Tag.create({ tag_name: tag }).save();
+            }
+            tag = foundTag;
+          }
+          return tag;
+        })
+      );
+      console.log("new tags = ", newTags);
+      game.tags = newTags;
+      game.imageUrl = imageUrl;
+      game.game_name = game_name;
+      game.game_type = game_type;
+      game.genre = genre;
+      game.description = description;
+      await game.save();
+      console.log("UPDATED GAME = ", game);
+      res.send(game);
+    } else {
+      res.status(500).send("Unauthorized Request.");
+    }
+  } catch (err) {
+    next(err);
+  }
+});
 router.delete("/:id", async (req, res, next) => {
   try {
     await Game.delete(req.params.id);
-    res.send(204);
-  } catch(err) {
-    console.log("Something went wrong! ", err);
+    res.sendStatus(204);
+  } catch (err) {
+    next(err);
   }
-})
+});
 
 module.exports = router;

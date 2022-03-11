@@ -3,6 +3,7 @@ html, body {
     width: 100vw;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
 }
 #header {
     min-height: 10vh;
@@ -66,6 +67,7 @@ h3, h6 {
 #tag {
     color: #ffffff;
     background-color: #48478a !important;
+    margin-left: 5px;
 }
 
 #avatar {
@@ -93,4 +95,9 @@ h3, h6 {
     z-index: 1;
     text-indent: 2em;
     padding: 4%;
+}
+
+#edit-delete-btn-group > button {
+    margin: 10px;
+    padding: 10px;
 }
