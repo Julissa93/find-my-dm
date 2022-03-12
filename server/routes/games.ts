@@ -2,8 +2,8 @@ import express from "express";
 import Game from "../entities/Game";
 import Tag from "../entities/Tag";
 import User from "../entities/User";
-import { getConnection } from "typeorm";
 import { requireToken } from "./auth";
+import Player from "../entities/Player";
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
@@ -26,10 +26,12 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req: any, res, next) => {
+router.post("/", requireToken, async (req: any, res, next) => {
   console.log("req.body = ", req.body);
   try {
+    console.log("req.user = ", req.user)
     if (req.user) {
+      console.log("in if statement")
       const game = await Game.create({
         imageUrl: req.body.game.imageUrl,
         game_name: req.body.game.game_name,
@@ -37,14 +39,16 @@ router.post("/", async (req: any, res, next) => {
         genre: req.body.game.genre,
         description: req.body.game.description,
       }).save();
+      console.log("Game = ", game)
       const createdGame = await Game.findOne({
         where: { id: game.id },
         relations: ["tags", "players"],
       });
+      console.log("createdGame = ", createdGame)
       const { userId } = req.body;
-      let player = await User.findOne({
-        where: { id: userId },
-        relations: ["games"],
+      let player = await Player.findOne({
+        where: { userId },
+        relations: ["game"],
       });
       createdGame.players = [...createdGame.players, player];
       let tags = await Promise.all(
@@ -114,4 +118,4 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

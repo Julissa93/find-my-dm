@@ -1,13 +1,9 @@
-const path = require("path");
-const express = require("express");
+import path from "path";
+import express from "express";
+import morgan from "morgan";
+import { createConnection, Connection } from "typeorm";
 const app = express();
 const PORT = 8080;
-const { getConnection } = require("typeorm");
-const Game = require("./entities/Game.ts");
-const User = require("./entities/User.ts");
-const morgan = require("morgan");
-const connect = require("./db");
-const { createConnection, Connection } = require("typeorm");
 
 app.use(morgan("dev"));
 // body parsing middleware

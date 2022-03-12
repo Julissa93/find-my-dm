@@ -54,4 +54,4 @@ router.get("/", requireToken, async (req: IUserRequest, res, next) => {
     }
 })
 
-module.exports = router;
+export default router;

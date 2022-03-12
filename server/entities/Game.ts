@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import User from "./User";
 import Tag from "./Tag";
+import Player from "./Player";
 
 @Entity()
 export default class Game extends BaseEntity {
@@ -47,8 +48,14 @@ export default class Game extends BaseEntity {
   })
   tags: Tag[];
 
-  @ManyToMany((type) => User, (user) => user.games)
-  @JoinTable({
+  @OneToMany((type) => Player, (player) => player.game, {
+    cascade: true,
+    eager: true,
+  })
+  players: Player[];
+
+  //@JoinTable({Player});
+  /*@JoinTable({
     name: "players",
     joinColumn: {
       name: "game",
@@ -58,6 +65,5 @@ export default class Game extends BaseEntity {
       name: "user",
       referencedColumnName: "id",
     },
-  })
-  players: User[];
+  })*/
 }
