@@ -31,4 +31,18 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+router.post("/", async (req, res, next) => {
+  console.log('in post router = ', req.body)
+  const { email, firstname, lastname, username, password } = req.body;
+  try {
+    const newUser = await User.create({
+      email, firstname, lastname, username, password
+    }).save();
+    console.log('newuser = ', newUser)
+    res.send(newUser);
+
+  } catch(err) {
+    console.error(err)
+  }
+})
 export default router;

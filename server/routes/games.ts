@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const games = await Game.find({ relations: ["tags", "players"] });
+    const games = await Game.find();
     res.send(games);
   } catch (err) {
     next(err);
