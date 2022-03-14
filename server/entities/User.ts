@@ -12,6 +12,15 @@ import Player from "./Player";
 export default class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
+   
+  @Column()
+  email: string;
+
+  @Column()
+  firstname: string;
+
+  @Column()
+  lastname: string; 
 
   @Column()
   username: string;
