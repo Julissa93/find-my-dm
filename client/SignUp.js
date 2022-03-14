@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Grid, TextField, Button, Typography } from "@mui/material";
 import axios from "axios";
-import { LineAxisOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
