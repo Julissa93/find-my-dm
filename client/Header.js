@@ -29,6 +29,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
+  const token = JSON.parse(window.localStorage.getItem("token"));
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -52,6 +53,9 @@ const Header = () => {
         break;
       case "My Games":
         navigate("/mygames");
+        break;
+      case "Create Game":
+        navigate("/creategame")
         break;
       default:
         console.error("Something Went Wrong!");
@@ -114,7 +118,7 @@ const Header = () => {
           </Grid>
 
           <Grid container item xs={4} justifyContent="end" alignItems="center">
-            {!user.username ? (
+            {!token ? (
                 <Grid item container justifyContent="flex-end" sx={{m: 2}}>
                   <Button
                     variant="contained"

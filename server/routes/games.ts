@@ -27,9 +27,7 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.post("/", requireToken, async (req: any, res, next) => {
-  console.log("req.body = ", req.body);
   try {
-    console.log("req.user = ", req.user)
     if (req.user) {
       console.log("in if statement")
       const game = await Game.create({
@@ -46,11 +44,16 @@ router.post("/", requireToken, async (req: any, res, next) => {
       });
       console.log("createdGame = ", createdGame)
       const { userId } = req.body;
-      let player = await Player.findOne({
-        where: { userId },
-        relations: ["game"],
+      console.log("user id = ", userId);
+      const user = await User.findOne({
+        where: { id: userId }
       });
-      createdGame.players = [...createdGame.players, player];
+      console.log("PLAYER CREATING GAME = ", user)
+      //create player for that game and make them admin since they created it 
+      //passing game because createdGame caused an error, not sure why?
+      const newPlayer = await Player.create({player_id: user.id, game_id: createdGame.id, admin: true}).save();
+      createdGame.players = [...createdGame.players, newPlayer];
+      user.games = [...user.games, newPlayer];
       let tags = await Promise.all(
         req.body.game.tags.map(async (tag) => {
           let foundTag = await Tag.findOne({ where: { tag_name: tag } });
@@ -62,8 +65,6 @@ router.post("/", requireToken, async (req: any, res, next) => {
       );
       createdGame.tags = tags;
       await createdGame.save();
-      console.log("player after save = ", player);
-      console.log("CREATED GAME = ", createdGame);
       res.send(createdGame);
     } else {
       res.status(500).send("Unauthorized Request.");

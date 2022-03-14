@@ -23,5 +23,5 @@ export default class User extends BaseEntity {
     cascade: true,
     eager: true,
   })
-  games: Game[];
+  games: Player[];
 }

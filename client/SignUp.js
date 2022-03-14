@@ -1,15 +1,32 @@
 import { useState } from "react";
 import { Grid, TextField, Button, Typography } from "@mui/material";
+import axios from "axios";
+import { LineAxisOutlined } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
-  const [user, setUser] = useState({email: "", firstname: "", lastname: "", username: "", password: "",  });
+  const [user, setUser] = useState({
+    email: "",
+    firstname: "",
+    lastname: "",
+    username: "",
+    password: "",
+  });
+  const navigate = useNavigate();
 
   const handleChange = (evt) => {
     setUser({ ...user, [evt.target.name]: evt.target.value });
   };
 
-  const handleSubmit = (evt) => {
+  const handleSubmit = async (evt) => {
     console.log("submitted! ", user);
+    try {
+      const { data } = await axios.post("/api/users", user);
+      setUser(data);
+      navigate("/games");
+    } catch(err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -30,7 +47,7 @@ const SignUp = () => {
         name="firstname"
         label="First Name"
         margin="dense"
-        value={user.username}
+        value={user.firstname}
         onChange={handleChange}
       ></TextField>
       <TextField

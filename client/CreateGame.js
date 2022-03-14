@@ -76,13 +76,18 @@ const CreateGame = (props) => {
     let updatedTags = [];
 
     try {
+      const token = JSON.parse(window.localStorage.getItem("token"));
       if (props.editGame === true) {
         await axios.put(`/api/games/${props.id}`, game);
         props.setEditGame(false);
         setSubmitted(true);
       } else {
         console.log("before post req is called")
-        const res = await axios.post("/api/games", {game, userId: user.id});
+        const res = await axios.post("/api/games", {game, userId: user.id}, {
+          headers: {
+            authorization: token.accessToken,
+          },
+        });
 
         console.log("after post req is called res = ", res)
         navigate("/games");
