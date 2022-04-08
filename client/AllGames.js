@@ -14,7 +14,7 @@ import { UserContext } from "./UserContext";
 import axios from "axios";
 import SingleGame from "./SingleGame";
 
-const AllGames = () => {
+const AllGames = (props) => {
   const [games, setGames] = useState([]);
   const navigate = useNavigate();
   const {user} = useContext(UserContext);
@@ -31,11 +31,12 @@ const AllGames = () => {
     }
     fetchGames();
   }, []);
+  
+  //console.log("props = ", props)
 
   return (
     <Grid item container direction="row" justifyContent="center" id="games">
       <Grid item xs={12} >
-      {user.username ? <h3>Hello, {user.username}</h3> : <></> }
       </Grid>
       {games.map((game, idx) => (
         <SingleGame key={idx} game={game}/>

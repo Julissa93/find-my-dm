@@ -38,7 +38,7 @@ const CreateGame = (props) => {
   const [tagInputValue, setTagInputValue] = useState("");
   let navigate = useNavigate();
   const { user } = useContext(UserContext);
-  console.log("ID = ", user)
+  console.log("ID = ", user);
 
   useEffect(() => {
     if (props.id) {
@@ -82,14 +82,18 @@ const CreateGame = (props) => {
         props.setEditGame(false);
         setSubmitted(true);
       } else {
-        console.log("before post req is called")
-        const res = await axios.post("/api/games", {game, userId: user.id}, {
-          headers: {
-            authorization: token.accessToken,
-          },
-        });
+        console.log("before post req is called");
+        const res = await axios.post(
+          "/api/games",
+          { game, userId: user.id },
+          {
+            headers: {
+              authorization: token.accessToken,
+            },
+          }
+        );
 
-        console.log("after post req is called res = ", res)
+        console.log("after post req is called res = ", res);
         navigate("/games");
       }
     } catch (err) {
@@ -115,8 +119,9 @@ const CreateGame = (props) => {
       item
       direction="column"
       xs={12}
+      md={10}
       justifyContent="center"
-      id="create-game-form"
+      className="form"
     >
       <Typography variant="h6" component="h6" textAlign="center">
         {props.editGame === true ? "Edit Game" : "Create Game"}

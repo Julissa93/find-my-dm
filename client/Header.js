@@ -55,7 +55,7 @@ const Header = () => {
         navigate("/mygames");
         break;
       case "Create Game":
-        navigate("/creategame")
+        navigate("/creategame");
         break;
       default:
         console.error("Something Went Wrong!");
@@ -133,6 +133,7 @@ const Header = () => {
                 </Grid>
             ) : (
               <>
+                {user.username ? <h3>Hello, {user.username}</h3> : <></> }
                 <Tooltip title="Open settings">
                   <IconButton onClick={handleOpenUserMenu} id="avatar">
                     <Avatar alt="Remy Sharp">{}</Avatar>

@@ -12,7 +12,6 @@ import {
 
 const SingleGame = ( props ) => {
     const { game } = props;
-    console.log("game", game);
     const navigate = useNavigate();
     return ( 
         <Grid item xs={12} md={6} lg={4} id="card">
@@ -44,7 +43,7 @@ const SingleGame = ( props ) => {
                 </Typography>
               </Grid>
             </CardContent>
-            <CardContent sx={{ mt: 0, mb: 0, pt: 0, pb: 0 }}>
+           { <CardContent sx={{ mt: 0, mb: 0, pt: 0, pb: 0 }}>
               <Grid container direction="row" justifyContent="flex-end">
                 {game.tags.map((tag, idx) => {
                   return (
@@ -57,7 +56,7 @@ const SingleGame = ( props ) => {
                   );
                 })}
               </Grid>
-            </CardContent>
+              </CardContent>}
             <CardActions sx={{pr: 2}}>
               <Grid container direction="row" justifyContent="flex-end">
                 <Button size="small">Share</Button>
